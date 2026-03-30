@@ -2,4 +2,4 @@ flask
 flask-cors
 gunicorn
 python-dotenv
-libsql_client
+libsql
