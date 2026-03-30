@@ -38,7 +38,7 @@ def fetch_stats():
     # Sessions (optional table)
     try:
         sessions_count = cursor.execute(
-            "SELECT COUNT(*) FROM sessions"
+            "SELECT COUNT(*) FROM tutor_sessions"
         ).fetchone()[0]
 
         avg_sessions = round(sessions_count / 30) if sessions_count else 0
