@@ -403,15 +403,31 @@
   </div>
 
   <script>
-   window.addEventListener('DOMContentLoaded',()=>{
-    fetch('/api/user_stats')
+    // Fetch stats from app.py on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/user_stats')
         .then(res => res.json())
-        .then(data=>{
-            animateCount(document.getElementById('totalUsers'),    data.users_count);
+        .then(data => {
+          // Total Users
+          if (data.users_count !== null && data.users_count !== undefined) {
+            animateCount(document.getElementById('totalUsers'), data.users_count);
+          }
+          // Total Sessions
+          if (data.sessions_count !== null && data.sessions_count !== undefined) {
+            animateCount(document.getElementById('totalSessions'), data.sessions_count);
+          }
+          // Avg Sessions/Day
+          if (data.avg_sessions !== null && data.avg_sessions !== undefined) {
+            animateCount(document.getElementById('avgSessions'), data.avg_sessions);
+          }
         })
-   })
+        .catch(err => {
+          console.error('Failed to fetch stats:', err);
+        });
+    });
 
     function animateCount(el, target, duration = 1400) {
+      if (!target || target === 0) { el.textContent = '0'; return; }
       let start = 0;
       const step = target / (duration / 16);
       const timer = setInterval(() => {
@@ -420,12 +436,6 @@
         el.textContent = Math.floor(start).toLocaleString();
       }, 16);
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      animateCount(document.getElementById('totalUsers'),    USERS);
-      animateCount(document.getElementById('totalSessions'), SESSIONS);
-      animateCount(document.getElementById('avgSessions'),   Math.round(SESSIONS / DAYS));
-    });
 
     function handleSend() {
       const subject = document.getElementById('emailSubject');
