@@ -41,7 +41,7 @@ def fetch_stats():
             "SELECT COUNT(*) FROM tutor_sessions"
         ).fetchone()[0]
 
-        avg_sessions = round(sessions_count / 30) if sessions_count else 0
+        avg_sessions = (sessions_count / 30) if sessions_count else 0
 
     except Exception as e:
         print("Session table error:", e)
