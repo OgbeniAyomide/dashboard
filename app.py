@@ -63,7 +63,7 @@ def auth():
 
 @app.route("/")
 def index():
-    return render_template("dashboard.html")
+    return render_template("verify.html")
 
 
 @app.route("/api/login", methods=["POST"])
