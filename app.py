@@ -20,14 +20,16 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "fallback-secret-key")
 CORS(app)
 
-# Create DB connection (global, reused)
-conn = libsql.connect(
-    database=TURSO_URL,
-    auth_token=TURSO_KEY
-)
+# Create DB connection 
+def get_connection():
+    return libsql.connect(
+        database=TURSO_URL,
+        auth_token=TURSO_KEY
+    )
 
 
 def fetch_stats():
+    conn = get_connection()
     cursor = conn.cursor()
 
     # Total users
