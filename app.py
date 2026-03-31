@@ -57,9 +57,25 @@ def fetch_stats():
     }
 
 
+@app.route("/auth")
+def auth():
+        return render_template("verify.html")
+
 @app.route("/")
 def index():
     return render_template("dashboard.html")
+
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    if email == os.getenv("ADMIN_EMAIL") and password == os.getenv("ADMIN_PASSWORD"):
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False}), 401
 
 
 @app.route("/api/user_stats", methods=["GET"])
