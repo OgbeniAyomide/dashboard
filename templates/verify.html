@@ -127,6 +127,14 @@
                 else showError(data.message);
             } catch { showError('An error occurred. Please try again.'); }
         }
+
+         document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const loginForm = document.getElementById('loginForm');
+                if (!loginForm.classList.contains('hidden')) handleLogin();
+                else handleSignup();
+            }
+        });  
         </script>
         </body>
         </html>
