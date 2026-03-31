@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template,redirect, url_for, request, session
+from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 import libsql
 import os
@@ -57,34 +57,9 @@ def fetch_stats():
     }
 
 
-
 @app.route("/")
 def index():
-    return render_template("verify.html")
-
-
-
-@app.route("/auth")
-def auth():
-        return render_template("verify.html")
-
-@app.route('/dashboard')
-def dashboard():
-    if 'user' not in session:
-        return redirect(url_for('auth'))
-    return render_template('dashboard.html', user=session['user'])
-
-
-@app.route("/api/login", methods=["POST"])
-def login():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
-
-    if email == os.getenv("ADMIN_EMAIL") and password == os.getenv("ADMIN_PASSWORD"):
-        return jsonify({"success": True})
-    else:
-        return jsonify({"success": False}), 401
+    return render_template("dashboard.html")
 
 
 @app.route("/api/user_stats", methods=["GET"])
