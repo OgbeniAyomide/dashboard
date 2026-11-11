@@ -395,6 +395,29 @@
       80%     { transform: translateX(4px); }
     }
     .error-border { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.1) !important; }
+
+    /* Instant anti-FOUC & fallback utility rules before Tailwind CDN initializes */
+    .hidden { display: none !important; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 20px;
+    }
+    @media (min-width: 640px) {
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1024px) {
+      .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    .broadcast-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 768px) {
+      .broadcast-grid { grid-template-columns: 1fr 1fr; }
+      .broadcast-span-2 { grid-column: span 2; }
+    }
   </style>
 </head>
 <body class="relative">
@@ -468,7 +491,7 @@
         <h1 style="font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em; color: var(--accent);">Dashboard</h1>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="kpi-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <!-- Total Users -->
         <div class="card p-6 anim anim-d1">
           <div class="flex items-start justify-between mb-4">
@@ -757,7 +780,7 @@
         </div>
 
         <!-- Responsive 1-col mobile / 2-col desktop grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="broadcast-grid grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label class="label" for="emailSubject">Subject Line</label>
             <input id="emailSubject" type="text" class="input-field" placeholder="e.g. Important update for your account…"/>
@@ -766,7 +789,7 @@
             <label class="label" for="emailHeader">Email Header</label>
             <input id="emailHeader" type="text" class="input-field" placeholder="e.g. New features just dropped"/>
           </div>
-          <div class="md:col-span-2">
+          <div class="broadcast-span-2 md:col-span-2">
             <label class="label" for="emailBody">Message Body</label>
             <textarea id="emailBody" class="input-field" placeholder="Write your full email content here…"></textarea>
           </div>
@@ -1005,35 +1028,81 @@
     async function loadDashboard(isManual = false) {
       setConnectionState('syncing');
       try {
-        const res = await fetch('/api/users', { headers: { 'Accept': 'application/json' } });
-        const payload = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(payload.detail || payload.error || `HTTP ${res.status}`);
+        // 1. Always fetch /api/user_stats first — works on BOTH old and new app.py!
+        const statsRes = await fetch('/api/user_stats', { headers: { 'Accept': 'application/json' } });
+        const statsPayload = await statsRes.json().catch(() => ({}));
+        if (!statsRes.ok) {
+          throw new Error(statsPayload.detail || statsPayload.error || `HTTP ${statsRes.status} from /api/user_stats`);
         }
 
-        const stats = payload.stats || {};
-        allUsers = Array.isArray(payload.users) ? payload.users : [];
+        const usersCount = statsPayload.users_count;
+        const sessionsCount = statsPayload.sessions_count;
+        const avgSessionsRaw = statsPayload.avg_sessions;
+        const avgSessionsRounded =
+          avgSessionsRaw !== null && avgSessionsRaw !== undefined
+            ? Math.round(Number(avgSessionsRaw) * 100) / 100
+            : null;
 
-        // Update KPI cards
-        animateMetric(document.getElementById('totalUsers'), 'users', stats.users_count, 0);
-        animateMetric(
-          document.getElementById('newUsers7d'),
-          'new7d',
-          stats.new_users_7d !== null && stats.new_users_7d !== undefined ? stats.new_users_7d : allUsers.length,
-          0
-        );
-        animateMetric(document.getElementById('totalSessions'), 'sessions', stats.sessions_count, 0);
+        // Populate KPI stat cards immediately so counts ALWAYS display
+        animateMetric(document.getElementById('totalUsers'), 'users', usersCount, 0);
+        animateMetric(document.getElementById('totalSessions'), 'sessions', sessionsCount, 0);
         animateMetric(
           document.getElementById('avgSessions'),
           'avgSessions',
-          stats.avg_sessions,
-          stats.avg_sessions !== null && stats.avg_sessions !== undefined && stats.avg_sessions % 1 !== 0 ? 2 : 0
+          avgSessionsRounded,
+          avgSessionsRounded !== null && avgSessionsRounded % 1 !== 0 ? 2 : 0
         );
 
-        applyTrendBadge(document.getElementById('usersTrendBadge'), stats.users_trend);
-        applyTrendBadge(document.getElementById('sessionsTrendBadge'), stats.sessions_trend);
+        applyTrendBadge(
+          document.getElementById('usersTrendBadge'),
+          statsPayload.users_trend || { text: 'Registered total', direction: 'neutral' }
+        );
+        applyTrendBadge(
+          document.getElementById('sessionsTrendBadge'),
+          statsPayload.sessions_trend || { text: 'Recorded sessions', direction: 'neutral' }
+        );
 
-        const levelsCount = stats.levels_count || 0;
+        if (usersCount !== null && usersCount !== undefined) {
+          document.getElementById('recipientCountLabel').textContent = `${Number(usersCount).toLocaleString()} registered`;
+          document.getElementById('usersCountPill').textContent = `${Number(usersCount).toLocaleString()} ${Number(usersCount) === 1 ? 'user' : 'users'}`;
+        }
+
+        // 2. Check if /api/user_stats already includes `users` (new app.py); otherwise try /api/users
+        let usersArray = Array.isArray(statsPayload.users) ? statsPayload.users : null;
+        let newUsers7d = statsPayload.new_users_7d;
+        let levelsCount = statsPayload.levels_count;
+
+        if (!usersArray) {
+          const usersRes = await fetch('/api/users', { headers: { 'Accept': 'application/json' } });
+          if (usersRes.ok) {
+            const usersPayload = await usersRes.json().catch(() => ({}));
+            usersArray = Array.isArray(usersPayload.users) ? usersPayload.users : [];
+            if (usersPayload.stats) {
+              newUsers7d = usersPayload.stats.new_users_7d;
+              levelsCount = usersPayload.stats.levels_count;
+            }
+          } else if (usersRes.status === 404) {
+            // Stats loaded fine, but server is still running the old app.py without /api/users!
+            document.getElementById('newUsers7d').textContent = '—';
+            document.getElementById('levelsSummaryBadge').textContent = 'Update app.py';
+            setConnectionState('live');
+            renderBackendUpdateNotice(usersCount);
+            return;
+          } else {
+            const errJson = await usersRes.json().catch(() => ({}));
+            throw new Error(errJson.detail || errJson.error || `HTTP ${usersRes.status} from /api/users`);
+          }
+        }
+
+        allUsers = usersArray;
+
+        animateMetric(
+          document.getElementById('newUsers7d'),
+          'new7d',
+          newUsers7d !== null && newUsers7d !== undefined ? newUsers7d : 0,
+          0
+        );
+
         const levelsBadge = document.getElementById('levelsSummaryBadge');
         levelsBadge.textContent = levelsCount > 0
           ? `${levelsCount} active ${levelsCount === 1 ? 'level' : 'levels'}`
@@ -1056,6 +1125,29 @@
           renderTableError(err.message);
         }
       }
+    }
+
+    function renderBackendUpdateNotice(usersCount) {
+      const tbody = document.getElementById('usersTableBody');
+      const countText = usersCount !== null && usersCount !== undefined ? `${usersCount} registered users` : 'your users';
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="py-12 text-center">
+            <div class="max-w-lg mx-auto px-4">
+              <span class="badge amber mb-3">Backend Restart / Update Needed</span>
+              <p class="font-bold text-base mb-1.5" style="color: var(--accent);">
+                Stats connected (${escapeHtml(countText)}), but the server is still running the old <code>app.py</code>
+              </p>
+              <p class="text-xs leading-relaxed mb-4" style="color: var(--muted);">
+                Your live server served the updated <code>dashboard.html</code>, but <code>/api/users</code> returned <strong>404 Not Found</strong>.
+                Replace <code>app.py</code> (and <code>requirements.txt</code>) on ZevCloud and <strong>Restart / Redeploy</strong> your Gunicorn service so the new Python routes load into memory.
+              </p>
+              <button type="button" onclick="loadDashboard(true)" class="secondary-btn">Check Again</button>
+            </div>
+          </td>
+        </tr>
+      `;
+      document.getElementById('paginationSummary').textContent = 'Waiting for updated app.py deployment';
     }
 
     function populateLevelFilter(users) {
@@ -1434,5 +1526,5 @@
       setInterval(() => loadDashboard(false), 45000);
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a59028b72abf8ddc',t:'MTc5NDQzMDExOQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a59028b72abf8ddc',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5903d3bfa18df76',t:'MTc5NDQzMDk2MA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5903d3bfa18df76',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
