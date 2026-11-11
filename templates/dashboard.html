@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard</title>
+  <title>Quevra · Admin Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a1a2e'/%3E%3Crect x='7' y='7' width='7' height='7' rx='1.5' fill='none' stroke='%23fff' stroke-width='2.2'/%3E%3Crect x='18' y='7' width='7' height='7' rx='1.5' fill='none' stroke='%23fff' stroke-width='2.2'/%3E%3Crect x='7' y='18' width='7' height='7' rx='1.5' fill='none' stroke='%23fff' stroke-width='2.2'/%3E%3Crect x='18' y='18' width='7' height='7' rx='1.5' fill='none' stroke='%23a5b4fc' stroke-width='2.2'/%3E%3C/svg%3E"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -11,17 +12,25 @@
     :root {
       --bg: #f5f4f0;
       --surface: #ffffff;
+      --surface-subtle: #faf9f6;
       --border: #e4e2db;
       --border-hover: #d0cdc4;
       --accent: #1a1a2e;
       --accent2: #4f46e5;
       --accent-light: #ede9fe;
       --text: #1a1a2e;
-      --muted: #8b8980;
+      --muted: #7c7a72;
       --success: #059669;
       --success-light: #d1fae5;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
     body {
       background-color: var(--bg);
       color: var(--text);
@@ -29,6 +38,7 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
+
     .mono { font-family: 'DM Mono', monospace; }
 
     body::before {
@@ -57,11 +67,12 @@
     }
 
     .stat-number {
-      font-size: 2.8rem;
+      font-size: 2.5rem;
       font-weight: 800;
-      line-height: 1;
+      line-height: 1.05;
       color: var(--accent);
       letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
     }
 
     .stat-icon {
@@ -77,20 +88,31 @@
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       background: var(--success-light);
       color: var(--success);
-      border: 1px solid rgba(5,150,105,0.15);
+      border: 1px solid rgba(5,150,105,0.16);
       font-size: 0.7rem;
       padding: 3px 9px;
       border-radius: 100px;
       font-family: 'DM Mono', monospace;
       font-weight: 500;
+      white-space: nowrap;
+    }
+    .badge.down {
+      background: var(--danger-light);
+      color: var(--danger);
+      border-color: rgba(220,38,38,0.16);
     }
     .badge.indigo {
       background: var(--accent-light);
       color: var(--accent2);
-      border-color: rgba(79,70,229,0.15);
+      border-color: rgba(79,70,229,0.16);
+    }
+    .badge.amber {
+      background: var(--warning-light);
+      color: var(--warning);
+      border-color: rgba(217,119,6,0.18);
     }
     .badge.neutral {
       background: #f0ede8;
@@ -103,31 +125,31 @@
       border: 1px solid var(--border);
       border-radius: 10px;
       color: var(--text);
-      font-family: 'Syne', sans-serif;
-      font-size: 0.9rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.88rem;
       transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
       outline: none;
       width: 100%;
-      padding: 12px 16px;
+      padding: 11px 14px;
     }
     .input-field:focus {
       border-color: var(--accent2);
       background: #fff;
-      box-shadow: 0 0 0 3px rgba(79,70,229,0.08);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.09);
     }
-    .input-field::placeholder { color: #c0bdb6; }
-    textarea.input-field { resize: none; min-height: 130px; }
+    .input-field::placeholder { color: #b5b2aa; }
+    textarea.input-field { resize: vertical; min-height: 130px; }
 
     .send-btn {
       background: var(--accent);
       color: #fff;
       font-family: 'Syne', sans-serif;
       font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 0.03em;
+      font-size: 0.88rem;
+      letter-spacing: 0.02em;
       border: none;
       border-radius: 10px;
-      padding: 13px 26px;
+      padding: 12px 24px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
@@ -138,54 +160,37 @@
     }
     .send-btn:hover {
       background: #2d2d50;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(26,26,46,0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(26,26,46,0.18);
     }
     .send-btn:active { transform: translateY(0); }
 
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(26,26,46,0.45);
-      backdrop-filter: blur(8px);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    .modal-overlay.active { opacity: 1; pointer-events: all; }
-    .modal {
-      background: var(--surface);
+    .secondary-btn {
+      background: #faf9f6;
+      color: var(--text);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 420px;
-      width: 90%;
-      text-align: center;
-      transform: scale(0.92) translateY(16px);
-      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-      box-shadow: 0 24px 80px rgba(0,0,0,0.12);
-    }
-    .modal-overlay.active .modal { transform: scale(1) translateY(0); }
-
-    .checkmark {
-      width: 60px;
-      height: 60px;
-      background: var(--success-light);
-      border: 2px solid rgba(5,150,105,0.2);
-      border-radius: 50%;
-      display: flex;
+      border-radius: 10px;
+      padding: 8px 13px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      margin: 0 auto 18px;
-      font-size: 1.6rem;
+      gap: 6px;
+      transition: background 0.18s, border-color 0.18s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .secondary-btn:hover {
+      background: #f0eee8;
+      border-color: var(--border-hover);
+    }
+    .secondary-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
 
     .label {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
       color: var(--muted);
       letter-spacing: 0.1em;
@@ -204,26 +209,15 @@
       color: var(--accent2);
     }
 
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .anim { animation: fadeUp 0.5s ease both; }
-    .anim-d1 { animation-delay: 0.05s; }
-    .anim-d2 { animation-delay: 0.1s; }
-    .anim-d3 { animation-delay: 0.15s; }
-    .anim-d4 { animation-delay: 0.22s; }
-
+    /* Status indicator dot */
     .pulse-dot {
-      width: 8px; height: 8px;
+      width: 8px;
+      height: 8px;
       background: var(--success);
       border-radius: 50%;
       display: inline-block;
       position: relative;
+      flex-shrink: 0;
     }
     .pulse-dot::after {
       content: '';
@@ -233,10 +227,164 @@
       background: rgba(5,150,105,0.25);
       animation: pulse 2s infinite;
     }
+    .pulse-dot.offline { background: var(--danger); }
+    .pulse-dot.offline::after { background: rgba(220,38,38,0.22); }
+    .pulse-dot.syncing { background: var(--warning); }
+    .pulse-dot.syncing::after { background: rgba(217,119,6,0.25); }
+
     @keyframes pulse {
       0%,100% { transform: scale(1); opacity: 1; }
       50%      { transform: scale(1.7); opacity: 0; }
     }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinning { animation: spin 0.8s linear infinite; }
+
+    /* Table styling */
+    .users-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .users-table th {
+      background: #faf9f5;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      padding: 13px 18px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .users-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid #efede7;
+      font-size: 0.86rem;
+      vertical-align: middle;
+    }
+    .users-table tbody tr {
+      transition: background-color 0.15s ease;
+    }
+    .users-table tbody tr:hover {
+      background-color: #fbfaf7;
+    }
+    .users-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+      letter-spacing: 0.02em;
+    }
+
+    /* Shimmer loading skeleton */
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #efede8 25%, #e4e1da 50%, #efede8 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.4s infinite linear;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,46,0.45);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      max-width: 430px;
+      width: 92%;
+      text-align: center;
+      transform: scale(0.94) translateY(14px);
+      transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.14);
+    }
+    .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+
+    .checkmark {
+      width: 58px;
+      height: 58px;
+      background: var(--success-light);
+      border: 2px solid rgba(5,150,105,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 1.5rem;
+      color: var(--success);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent);
+      color: #fff;
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(26,26,46,0.22);
+      z-index: 120;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.22s, transform 0.22s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .anim { animation: fadeUp 0.45s ease both; }
+    .anim-d1 { animation-delay: 0.04s; }
+    .anim-d2 { animation-delay: 0.08s; }
+    .anim-d3 { animation-delay: 0.12s; }
+    .anim-d4 { animation-delay: 0.16s; }
+    .anim-d5 { animation-delay: 0.20s; }
 
     .error-shake { animation: shake 0.38s ease; }
     @keyframes shake {
@@ -251,202 +399,997 @@
 </head>
 <body class="relative">
 
-  <header class="relative z-10" style="background: var(--surface); border-bottom: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-30" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--accent);">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
-            <rect x="3" y="3" width="7" height="7" rx="1"/>
-            <rect x="14" y="3" width="7" height="7" rx="1"/>
-            <rect x="3" y="14" width="7" height="7" rx="1"/>
-            <rect x="14" y="14" width="7" height="7" rx="1"/>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background: var(--accent);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4">
+            <rect x="3" y="3" width="7" height="7" rx="1.2"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.2"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.2"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.2" stroke="#a5b4fc"/>
           </svg>
         </div>
-        <span style="font-weight: 800; font-size: 2rem; color: var(--accent); letter-spacing: -0.01em;">Quevra</span>
+        <div class="flex items-baseline gap-2.5">
+          <span style="font-weight: 800; font-size: 1.55rem; color: var(--accent); letter-spacing: -0.02em;">Quevra</span>
+          <span class="mono hidden sm:inline-block" style="font-size: 0.65rem; padding: 2px 7px; border-radius: 6px; background: #f0ede8; color: var(--muted); font-weight: 500;">ADMIN</span>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="pulse-dot"></span>
-        <span class="mono" style="font-size: 0.72rem; color: var(--muted);">Live</span>
+
+      <nav class="hidden md:flex items-center gap-6 text-sm font-semibold" style="color: var(--muted);">
+        <a href="#overview" class="hover:text-slate-900 transition-colors">Overview</a>
+        <a href="#usersDirectory" class="hover:text-slate-900 transition-colors">Users Directory</a>
+        <a href="#broadcastSection" class="hover:text-slate-900 transition-colors">Email Broadcast</a>
+      </nav>
+
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-full" style="background: #faf9f6; border: 1px solid var(--border);">
+          <span id="statusDot" class="pulse-dot syncing"></span>
+          <span id="statusText" class="mono" style="font-size: 0.7rem; color: var(--text);">Syncing</span>
+        </div>
+        <span id="lastUpdated" class="mono hidden lg:inline-block" style="font-size: 0.7rem; color: var(--muted);">—</span>
+        <button id="refreshBtn" type="button" onclick="loadDashboard(true)" class="secondary-btn" title="Refresh live database records" aria-label="Refresh dashboard">
+          <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          <span class="hidden sm:inline">Refresh</span>
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="relative z-10 max-w-5xl mx-auto px-6 py-10">
+  <main class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
 
-    <div class="mb-8 anim">
-      <p class="section-title mb-1">Overview</p>
-      <h1 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; color: var(--accent);">Dashboard</h1>
+    <!-- API / DB Error Banner (Hidden unless an error occurs) -->
+    <div id="apiErrorBanner" class="hidden mb-6 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3" style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;">
+      <div class="flex items-start sm:items-center gap-3">
+        <svg class="flex-shrink-0 mt-0.5 sm:mt-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <div>
+          <p class="font-bold text-sm">Unable to load live data from database</p>
+          <p id="apiErrorDetail" class="mono text-xs opacity-85 mt-0.5">Please check your database connection and try again.</p>
+        </div>
+      </div>
+      <button type="button" onclick="loadDashboard(true)" class="secondary-btn self-start sm:self-auto" style="background: #fff; border-color: #fca5a5; color: #991b1b;">
+        Retry Connection
+      </button>
     </div>
 
-    <!-- Stat Cards -->
-    <div class="grid grid-cols-1 gap-5 mb-8" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+    <!-- Section 1: Overview KPIs -->
+    <section id="overview" class="mb-10">
+      <div class="mb-6 anim">
+        <p class="section-title mb-1">Overview</p>
+        <h1 style="font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em; color: var(--accent);">Dashboard</h1>
+      </div>
 
-      <div class="card p-6 anim anim-d1">
-        <div class="flex items-start justify-between mb-4">
-          <div>
-            <span class="label">Total Users</span>
-            <div class="stat-number" id="totalUsers"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Total Users -->
+        <div class="card p-6 anim anim-d1">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="label">Total Users</span>
+              <div class="stat-number" id="totalUsers">—</div>
+            </div>
+            <div class="stat-icon" style="background: #ede9fe;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
           </div>
-          <div class="stat-icon" style="background: #ede9fe;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          <div class="divider mb-3.5"></div>
+          <span id="usersTrendBadge" class="badge neutral">Loading…</span>
+        </div>
+
+        <!-- New Users (Last 7 Days) -->
+        <div class="card p-6 anim anim-d2">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="label">Joined (7 Days)</span>
+              <div class="stat-number" id="newUsers7d">—</div>
+            </div>
+            <div class="stat-icon" style="background: #e0f2fe;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="8.5" cy="7" r="4"/>
+                <line x1="20" y1="8" x2="20" y2="14"/>
+                <line x1="23" y1="11" x2="17" y2="11"/>
+              </svg>
+            </div>
+          </div>
+          <div class="divider mb-3.5"></div>
+          <span id="levelsSummaryBadge" class="badge indigo">All levels</span>
+        </div>
+
+        <!-- Total Sessions -->
+        <div class="card p-6 anim anim-d3">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="label">Total Sessions</span>
+              <div class="stat-number" id="totalSessions">—</div>
+            </div>
+            <div class="stat-icon" style="background: #d1fae5;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="divider mb-3.5"></div>
+          <span id="sessionsTrendBadge" class="badge neutral">Loading…</span>
+        </div>
+
+        <!-- Avg Sessions / Day -->
+        <div class="card p-6 anim anim-d4">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="label">Sessions / Day</span>
+              <div class="stat-number" id="avgSessions">—</div>
+            </div>
+            <div class="stat-icon" style="background: #fef3c7;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+          </div>
+          <div class="divider mb-3.5"></div>
+          <span class="badge neutral">Avg · 30-day window</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Registered Users Directory -->
+    <section id="usersDirectory" class="mb-10 anim anim-d4">
+      <div class="card">
+        <!-- Card Header -->
+        <div class="p-6 sm:p-7 pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4" style="border-bottom: 1px solid var(--border);">
+          <div>
+            <div class="flex items-center gap-2.5 mb-1">
+              <p class="section-title">User Directory</p>
+              <span id="usersCountPill" class="badge indigo">0 users</span>
+            </div>
+            <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--accent); letter-spacing: -0.02em;">All Joined Users</h2>
+            <p style="font-size: 0.84rem; color: var(--muted); margin-top: 3px;">
+              Names, email addresses, academic levels, and signup timestamps directly from your database.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button type="button" onclick="copyAllEmails()" class="secondary-btn" id="copyEmailsBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              Copy Emails
+            </button>
+            <button type="button" onclick="exportUsersCSV()" class="secondary-btn" id="exportCsvBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Search, Filter & Sort Toolbar -->
+        <div class="px-6 sm:px-7 py-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3" style="background: var(--surface-subtle); border-bottom: 1px solid var(--border);">
+          <!-- Search input -->
+          <div class="relative flex-1 max-w-full lg:max-w-md">
+            <svg class=" absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style="color: var(--muted);" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              id="userSearchInput"
+              type="text"
+              class="input-field"
+              style="padding-left: 38px; padding-right: 36px; padding-top: 9px; padding-bottom: 9px; background: #fff;"
+              placeholder="Search by name, email, or level… (press /)"
+              oninput="handleSearchChange()"
+            />
+            <button
+              id="clearSearchBtn"
+              type="button"
+              onclick="clearSearch()"
+              class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-stone-200/70"
+              style="color: var(--muted);"
+              aria-label="Clear search"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Filter & Sort Controls -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <select
+              id="levelFilterSelect"
+              onchange="handleFilterOrSortChange()"
+              class="input-field"
+              style="width: auto; min-width: 150px; padding: 9px 12px; background: #fff; cursor: pointer;"
+              aria-label="Filter by level"
+            >
+              <option value="ALL">All Levels</option>
+            </select>
+
+            <select
+              id="sortSelect"
+              onchange="handleFilterOrSortChange()"
+              class="input-field"
+              style="width: auto; min-width: 165px; padding: 9px 12px; background: #fff; cursor: pointer;"
+              aria-label="Sort users"
+            >
+              <option value="newest">Sort: Newest Joined</option>
+              <option value="oldest">Sort: Oldest Joined</option>
+              <option value="name_asc">Sort: Name (A → Z)</option>
+              <option value="name_desc">Sort: Name (Z → A)</option>
+              <option value="level_asc">Sort: Level</option>
+            </select>
+
+            <select
+              id="pageSizeSelect"
+              onchange="handlePageSizeChange()"
+              class="input-field mono"
+              style="width: auto; padding: 9px 11px; background: #fff; font-size: 0.78rem; cursor: pointer;"
+              aria-label="Rows per page"
+            >
+              <option value="10">10 / page</option>
+              <option value="25">25 / page</option>
+              <option value="50">50 / page</option>
+              <option value="ALL">Show All</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Responsive Table Container -->
+        <div class="overflow-x-auto">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email Address</th>
+                <th>Level</th>
+                <th>Time Joined</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <!-- Initial Skeleton Rows -->
+              <tr>
+                <td>
+                  <div class="flex items-center gap-3">
+                    <span class="skeleton" style="width: 36px; height: 36px; border-radius: 10px;"></span>
+                    <div>
+                      <span class="skeleton" style="width: 120px; height: 13px; display:block; margin-bottom: 6px;"></span>
+                      <span class="skeleton" style="width: 50px; height: 10px; display:block;"></span>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="skeleton" style="width: 180px; height: 13px;"></span></td>
+                <td><span class="skeleton" style="width: 78px; height: 22px; border-radius: 99px;"></span></td>
+                <td><span class="skeleton" style="width: 135px; height: 13px;"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="flex items-center gap-3">
+                    <span class="skeleton" style="width: 36px; height: 36px; border-radius: 10px;"></span>
+                    <div>
+                      <span class="skeleton" style="width: 145px; height: 13px; display:block; margin-bottom: 6px;"></span>
+                      <span class="skeleton" style="width: 44px; height: 10px; display:block;"></span>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="skeleton" style="width: 195px; height: 13px;"></span></td>
+                <td><span class="skeleton" style="width: 84px; height: 22px; border-radius: 99px;"></span></td>
+                <td><span class="skeleton" style="width: 125px; height: 13px;"></span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="flex items-center gap-3">
+                    <span class="skeleton" style="width: 36px; height: 36px; border-radius: 10px;"></span>
+                    <div>
+                      <span class="skeleton" style="width: 110px; height: 13px; display:block; margin-bottom: 6px;"></span>
+                      <span class="skeleton" style="width: 52px; height: 10px; display:block;"></span>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="skeleton" style="width: 165px; height: 13px;"></span></td>
+                <td><span class="skeleton" style="width: 72px; height: 22px; border-radius: 99px;"></span></td>
+                <td><span class="skeleton" style="width: 140px; height: 13px;"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="px-6 sm:px-7 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style="background: var(--surface-subtle); border-top: 1px solid var(--border);">
+          <p id="paginationSummary" class="mono" style="font-size: 0.75rem; color: var(--muted);">
+            Loading users…
+          </p>
+          <div class="flex items-center gap-2">
+            <button id="prevPageBtn" type="button" onclick="changePage(-1)" class="secondary-btn" disabled>
+              ← Prev
+            </button>
+            <span id="pageIndicator" class="mono px-2.5 text-xs font-medium" style="color: var(--text);">
+              Page 1 of 1
+            </span>
+            <button id="nextPageBtn" type="button" onclick="changePage(1)" class="secondary-btn" disabled>
+              Next →
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Email Composer (UI Preview preserved, mobile layout & modal fixed) -->
+    <section id="broadcastSection" class="anim anim-d5">
+      <div class="card p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-7">
+          <div>
+            <div class="flex flex-wrap items-center gap-2.5 mb-1">
+              <p class="section-title">Email Broadcast</p>
+              <span class="badge amber" title="Backend email delivery is paused for now">UI Preview · Delivery Paused</span>
+            </div>
+            <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--accent); letter-spacing: -0.02em;">Compose a message</h2>
+            <p style="font-size: 0.85rem; color: var(--muted); margin-top: 4px;">
+              Draft announcements for all <span id="recipientCountLabel" class="font-semibold" style="color: var(--text);">registered</span> users.
+            </p>
+          </div>
+          <div class="stat-icon hidden sm:flex" style="background: var(--accent-light); width: 48px; height: 48px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
             </svg>
           </div>
         </div>
-        <div class="divider mb-4"></div>
-        <span class="badge">↑ 12.4% this month</span>
-      </div>
 
-      <div class="card p-6 anim anim-d2">
-        <div class="flex items-start justify-between mb-4">
+        <!-- Responsive 1-col mobile / 2-col desktop grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <span class="label">Total Sessions</span>
-            <div class="stat-number" id="totalSessions">—</div>
+            <label class="label" for="emailSubject">Subject Line</label>
+            <input id="emailSubject" type="text" class="input-field" placeholder="e.g. Important update for your account…"/>
           </div>
-          <div class="stat-icon" style="background: #d1fae5;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-          </div>
-        </div>
-        <div class="divider mb-4"></div>
-        <span class="badge">↑ 8.7% this week</span>
-      </div>
-
-      <div class="card p-6 anim anim-d3">
-        <div class="flex items-start justify-between mb-4">
           <div>
-            <span class="label">Sessions / Day</span>
-            <div class="stat-number" id="avgSessions">—</div>
+            <label class="label" for="emailHeader">Email Header</label>
+            <input id="emailHeader" type="text" class="input-field" placeholder="e.g. New features just dropped"/>
           </div>
-          <div class="stat-icon" style="background: #fef3c7;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2">
-              <rect x="3" y="4" width="18" height="18" rx="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
+          <div class="md:col-span-2">
+            <label class="label" for="emailBody">Message Body</label>
+            <textarea id="emailBody" class="input-field" placeholder="Write your full email content here…"></textarea>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 mt-6" style="border-top: 1px solid var(--border); padding-top: 20px;">
+          <button id="sendBroadcastBtn" type="button" class="send-btn" onclick="handleSend()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
             </svg>
-          </div>
-        </div>
-        <div class="divider mb-4"></div>
-        <span class="badge neutral">Avg · last 30 days</span>
-      </div>
-
-    </div>
-
-    <!-- Email Composer -->
-    <div class="card p-8 anim anim-d4">
-      <div class="flex items-start justify-between mb-7">
-        <div>
-          <p class="section-title mb-1">Email Broadcast</p>
-          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--accent); letter-spacing: -0.02em;">Compose a message</h2>
-          <p style="font-size: 0.85rem; color: var(--muted); margin-top: 4px;">This will be sent to all registered users.</p>
-        </div>
-        <div class="stat-icon" style="background: var(--accent-light); width: 48px; height: 48px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <polyline points="22,6 12,13 2,6"/>
-          </svg>
+            Send to All Users
+          </button>
+          <p id="fieldError" class="mono" style="font-size:0.74rem; color:#dc2626; display:none;">
+            Please fill in all fields before sending.
+          </p>
         </div>
       </div>
-
-      <div class="grid gap-5" style="grid-template-columns: 1fr 1fr;">
-        <div>
-          <label class="label" for="emailSubject">Subject Line</label>
-          <input id="emailSubject" type="text" class="input-field" placeholder="e.g. Important update for your account…"/>
-        </div>
-        <div>
-          <label class="label" for="emailHeader">Email Header</label>
-          <input id="emailHeader" type="text" class="input-field" placeholder="e.g. New features just dropped 🚀"/>
-        </div>
-        <div style="grid-column: span 2;">
-          <label class="label" for="emailBody">Message Body</label>
-          <textarea id="emailBody" class="input-field" placeholder="Write your full email content here…"></textarea>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-4 mt-6" style="border-top: 1px solid var(--border); padding-top: 20px;">
-        <button class="send-btn" onclick="handleSend()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="22" y1="2" x2="11" y2="13"/>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-          Send to All Users
-        </button>
-        <p id="fieldError" class="mono" style="font-size:0.72rem; color:#ef4444; display:none;">
-          ⚠ Please fill in all fields before sending.
-        </p>
-      </div>
-    </div>
+    </section>
 
   </main>
 
-  <!-- Success Modal -->
-  <div class="modal-overlay" id="successModal" onclick="closeModal(event)">
+  <!-- Broadcast Preview Modal -->
+  <div class="modal-overlay" id="successModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" onclick="closeModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="checkmark">✓</div>
-      <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 8px; color: var(--accent);">Email Queued!</h2>
-      <p style="color: var(--muted); font-size: 0.88rem; line-height: 1.65; margin-bottom: 24px;">
-        Your broadcast has been queued and will be delivered to all users shortly.
+      <h2 id="modalTitle" style="font-size: 1.32rem; font-weight: 800; margin-bottom: 8px; color: var(--accent);">Broadcast Draft Validated</h2>
+      <p style="color: var(--muted); font-size: 0.86rem; line-height: 1.6; margin-bottom: 20px;">
+        Your message preview is ready. Email delivery is currently paused on the backend until SMTP/provider setup is enabled.
       </p>
-      <div style="background: #f8f7f4; border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align:left; margin-bottom: 24px;">
+      <div style="background: #f8f7f4; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; text-align:left; margin-bottom: 22px;">
         <span class="label" style="margin-bottom: 4px;">Subject</span>
-        <p id="previewSubject" class="mono" style="font-size:0.85rem; color: var(--accent);"></p>
+        <p id="previewSubject" class="mono" style="font-size:0.84rem; color: var(--accent); word-break: break-word;"></p>
+        <span class="label" style="margin-top: 10px; margin-bottom: 4px;">Header</span>
+        <p id="previewHeader" style="font-size:0.84rem; color: var(--muted); word-break: break-word;"></p>
       </div>
-      <button class="send-btn" onclick="closeModal()" style="background: var(--success); width: 100%; justify-content: center;">
+      <button type="button" class="send-btn" onclick="closeModal()" style="background: var(--success); width: 100%; justify-content: center;">
         Done
       </button>
     </div>
   </div>
 
-  <script>
-    // Fetch stats from app.py on page load
-    window.addEventListener('DOMContentLoaded', () => {
-      fetch('/api/user_stats')
-        .then(res => res.json())
-        .then(data => {
-          // Total Users
-          if (data.users_count !== null && data.users_count !== undefined) {
-            animateCount(document.getElementById('totalUsers'), data.users_count);
-          }
-          // Total Sessions
-          if (data.sessions_count !== null && data.sessions_count !== undefined) {
-            animateCount(document.getElementById('totalSessions'), data.sessions_count);
-          }
-          // Avg Sessions/Day
-          if (data.avg_sessions !== null && data.avg_sessions !== undefined) {
-            animateCount(document.getElementById('avgSessions'), data.avg_sessions);
-          }
-        })
-        .catch(err => {
-          console.error('Failed to fetch stats:', err);
-        });
-    });
+  <!-- Copy / Action Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <span id="toastMessage">Copied to clipboard</span>
+  </div>
 
-    function animateCount(el, target, duration = 1400) {
-      if (!target || target === 0) { el.textContent = '0'; return; }
-      let start = 0;
-      const step = target / (duration / 16);
-      const timer = setInterval(() => {
-        start += step;
-        if (start >= target) { el.textContent = target.toLocaleString(); clearInterval(timer); return; }
-        el.textContent = Math.floor(start).toLocaleString();
-      }, 16);
+  <script>
+    // Application State
+    let allUsers = [];
+    let filteredUsers = [];
+    let currentPage = 1;
+    let pageSize = 10;
+    let toastTimer = null;
+    const previousMetrics = {};
+
+    const AVATAR_PALETTES = [
+      { bg: '#ede9fe', fg: '#4f46e5' },
+      { bg: '#d1fae5', fg: '#047857' },
+      { bg: '#e0f2fe', fg: '#0369a1' },
+      { bg: '#fef3c7', fg: '#b45309' },
+      { bg: '#fce7f3', fg: '#be185d' },
+      { bg: '#e2e8f0', fg: '#334155' },
+    ];
+
+    const LEVEL_PALETTES = [
+      { bg: '#ede9fe', fg: '#4f46e5', border: 'rgba(79,70,229,0.18)' },
+      { bg: '#e0f2fe', fg: '#0369a1', border: 'rgba(3,105,161,0.18)' },
+      { bg: '#d1fae5', fg: '#047857', border: 'rgba(4,120,87,0.18)' },
+      { bg: '#fef3c7', fg: '#b45309', border: 'rgba(180,83,9,0.2)' },
+      { bg: '#fce7f3', fg: '#be185d', border: 'rgba(190,24,93,0.18)' },
+    ];
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
+    function hashString(str) {
+      let h = 0;
+      const s = String(str || '');
+      for (let i = 0; i < s.length; i++) {
+        h = ((h << 5) - h) + s.charCodeAt(i);
+        h |= 0;
+      }
+      return Math.abs(h);
+    }
+
+    function getInitials(name) {
+      const cleaned = String(name || '').trim();
+      if (!cleaned || cleaned === 'Unnamed User') return 'U';
+      const parts = cleaned.split(/\s+/).filter(Boolean);
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function getLevelStyle(level) {
+      if (!level || level === 'Unassigned') {
+        return 'background:#f0ede8;color:#7c7a72;border:1px solid #e4e2db;';
+      }
+      const p = LEVEL_PALETTES[hashString(level.toLowerCase()) % LEVEL_PALETTES.length];
+      return `background:${p.bg};color:${p.fg};border:1px solid ${p.border};`;
+    }
+
+    function formatJoinedDate(isoStr, rawStr) {
+      if (isoStr) {
+        const dt = new Date(isoStr);
+        if (!Number.isNaN(dt.getTime())) {
+          const formatted = dt.toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+          const timeFormatted = dt.toLocaleTimeString(undefined, {
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+          return {
+            primary: `${formatted} · ${timeFormatted}`,
+            relative: formatRelativeTime(dt),
+          };
+        }
+      }
+      if (rawStr) {
+        return { primary: rawStr, relative: 'Recorded timestamp' };
+      }
+      return { primary: 'Not recorded', relative: '—' };
+    }
+
+    function formatRelativeTime(dateObj) {
+      const diffMs = Date.now() - dateObj.getTime();
+      const diffSec = Math.round(diffMs / 1000);
+      if (diffSec < 60) return 'Just now';
+      const diffMin = Math.round(diffSec / 60);
+      if (diffMin < 60) return `${diffMin}m ago`;
+      const diffHr = Math.round(diffMin / 60);
+      if (diffHr < 24) return `${diffHr}h ago`;
+      const diffDays = Math.round(diffHr / 24);
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 30) return `${diffDays} days ago`;
+      const diffMonths = Math.round(diffDays / 30);
+      if (diffMonths < 12) return `${diffMonths} mo ago`;
+      const diffYears = Math.round(diffDays / 365);
+      return `${diffYears} yr ago`;
+    }
+
+    // Smooth requestAnimationFrame counter that cleanly handles both integers and decimals
+    function animateMetric(el, key, target, decimals = 0, duration = 900) {
+      if (target === null || target === undefined || Number.isNaN(Number(target))) {
+        el.textContent = '—';
+        return;
+      }
+      const endValue = Number(target);
+      const startValue = typeof previousMetrics[key] === 'number' ? previousMetrics[key] : 0;
+      previousMetrics[key] = endValue;
+
+      if (startValue === endValue) {
+        el.textContent = formatNumber(endValue, decimals);
+        return;
+      }
+
+      const startTime = performance.now();
+      function tick(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+        const current = startValue + (endValue - startValue) * eased;
+        el.textContent = formatNumber(current, decimals);
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          el.textContent = formatNumber(endValue, decimals);
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function formatNumber(num, decimals = 0) {
+      if (decimals > 0) {
+        return num.toLocaleString(undefined, {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        });
+      }
+      return Math.round(num).toLocaleString();
+    }
+
+    function applyTrendBadge(el, trendObj) {
+      if (!el || !trendObj) return;
+      el.className = 'badge';
+      if (trendObj.direction === 'up') {
+        // default green badge
+      } else if (trendObj.direction === 'down') {
+        el.classList.add('down');
+      } else {
+        el.classList.add('neutral');
+      }
+      el.textContent = trendObj.text || '—';
+    }
+
+    function setConnectionState(state, errorDetail = '') {
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      const banner = document.getElementById('apiErrorBanner');
+      const detail = document.getElementById('apiErrorDetail');
+      const refreshIcon = document.getElementById('refreshIcon');
+
+      dot.className = 'pulse-dot';
+      refreshIcon.classList.remove('spinning');
+
+      if (state === 'syncing') {
+        dot.classList.add('syncing');
+        text.textContent = 'Syncing';
+        refreshIcon.classList.add('spinning');
+      } else if (state === 'live') {
+        text.textContent = 'Live';
+        banner.classList.add('hidden');
+        const nowStr = new Date().toLocaleTimeString(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+        document.getElementById('lastUpdated').textContent = `Updated ${nowStr}`;
+      } else {
+        dot.classList.add('offline');
+        text.textContent = 'Offline';
+        detail.textContent = errorDetail || 'Could not reach /api/users.';
+        banner.classList.remove('hidden');
+      }
+    }
+
+    async function loadDashboard(isManual = false) {
+      setConnectionState('syncing');
+      try {
+        const res = await fetch('/api/users', { headers: { 'Accept': 'application/json' } });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(payload.detail || payload.error || `HTTP ${res.status}`);
+        }
+
+        const stats = payload.stats || {};
+        allUsers = Array.isArray(payload.users) ? payload.users : [];
+
+        // Update KPI cards
+        animateMetric(document.getElementById('totalUsers'), 'users', stats.users_count, 0);
+        animateMetric(
+          document.getElementById('newUsers7d'),
+          'new7d',
+          stats.new_users_7d !== null && stats.new_users_7d !== undefined ? stats.new_users_7d : allUsers.length,
+          0
+        );
+        animateMetric(document.getElementById('totalSessions'), 'sessions', stats.sessions_count, 0);
+        animateMetric(
+          document.getElementById('avgSessions'),
+          'avgSessions',
+          stats.avg_sessions,
+          stats.avg_sessions !== null && stats.avg_sessions !== undefined && stats.avg_sessions % 1 !== 0 ? 2 : 0
+        );
+
+        applyTrendBadge(document.getElementById('usersTrendBadge'), stats.users_trend);
+        applyTrendBadge(document.getElementById('sessionsTrendBadge'), stats.sessions_trend);
+
+        const levelsCount = stats.levels_count || 0;
+        const levelsBadge = document.getElementById('levelsSummaryBadge');
+        levelsBadge.textContent = levelsCount > 0
+          ? `${levelsCount} active ${levelsCount === 1 ? 'level' : 'levels'}`
+          : 'Recent signups';
+
+        document.getElementById('usersCountPill').textContent = `${allUsers.length.toLocaleString()} ${allUsers.length === 1 ? 'user' : 'users'}`;
+        document.getElementById('recipientCountLabel').textContent = `${allUsers.length.toLocaleString()} registered`;
+
+        populateLevelFilter(allUsers);
+        applyFiltersAndRender(false);
+        setConnectionState('live');
+
+        if (isManual) {
+          showToast('Dashboard synced with database');
+        }
+      } catch (err) {
+        console.error('Dashboard fetch failed:', err);
+        setConnectionState('offline', err.message);
+        if (allUsers.length === 0) {
+          renderTableError(err.message);
+        }
+      }
+    }
+
+    function populateLevelFilter(users) {
+      const select = document.getElementById('levelFilterSelect');
+      const previousSelection = select.value || 'ALL';
+
+      const countsByLevel = {};
+      users.forEach(u => {
+        const lvl = u.level || 'Unassigned';
+        countsByLevel[lvl] = (countsByLevel[lvl] || 0) + 1;
+      });
+
+      const sortedLevels = Object.keys(countsByLevel).sort((a, b) => {
+        if (a === 'Unassigned') return 1;
+        if (b === 'Unassigned') return -1;
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+      });
+
+      select.innerHTML = `<option value="ALL">All Levels (${users.length})</option>` +
+        sortedLevels.map(lvl => `<option value="${escapeHtml(lvl)}">${escapeHtml(lvl)} (${countsByLevel[lvl]})</option>`).join('');
+
+      if ([...select.options].some(opt => opt.value === previousSelection)) {
+        select.value = previousSelection;
+      } else {
+        select.value = 'ALL';
+      }
+    }
+
+    function applyFiltersAndRender(resetPage = true) {
+      const query = document.getElementById('userSearchInput').value.trim().toLowerCase();
+      const levelFilter = document.getElementById('levelFilterSelect').value;
+      const sortBy = document.getElementById('sortSelect').value;
+
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', query.length === 0);
+
+      filteredUsers = allUsers.filter(u => {
+        const matchesLevel = levelFilter === 'ALL' || (u.level || 'Unassigned') === levelFilter;
+        if (!matchesLevel) return false;
+        if (!query) return true;
+        const haystack = `${u.name || ''} ${u.email || ''} ${u.level || ''} ${u.joined_raw || ''}`.toLowerCase();
+        return haystack.includes(query);
+      });
+
+      filteredUsers.sort((a, b) => {
+        if (sortBy === 'newest' || sortBy === 'oldest') {
+          const tA = a.joined_at ? Date.parse(a.joined_at) : -Infinity;
+          const tB = b.joined_at ? Date.parse(b.joined_at) : -Infinity;
+          if (tA !== tB) return sortBy === 'newest' ? tB - tA : tA - tB;
+          return sortBy === 'newest'
+            ? String(b.id).localeCompare(String(a.id), undefined, { numeric: true })
+            : String(a.id).localeCompare(String(b.id), undefined, { numeric: true });
+        }
+        if (sortBy === 'name_asc') {
+          return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
+        }
+        if (sortBy === 'name_desc') {
+          return String(b.name || '').localeCompare(String(a.name || ''), undefined, { sensitivity: 'base' });
+        }
+        if (sortBy === 'level_asc') {
+          return String(a.level || '').localeCompare(String(b.level || ''), undefined, { numeric: true, sensitivity: 'base' });
+        }
+        return 0;
+      });
+
+      if (resetPage) currentPage = 1;
+      renderUsersTable();
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('usersTableBody');
+      const summary = document.getElementById('paginationSummary');
+      const pageInd = document.getElementById('pageIndicator');
+      const prevBtn = document.getElementById('prevPageBtn');
+      const nextBtn = document.getElementById('nextPageBtn');
+
+      const total = filteredUsers.length;
+      if (total === 0) {
+        const hasActiveFilters =
+          document.getElementById('userSearchInput').value.trim() !== '' ||
+          document.getElementById('levelFilterSelect').value !== 'ALL';
+
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="py-14 text-center">
+              <div class="max-w-sm mx-auto">
+                <p class="font-bold text-base mb-1" style="color: var(--accent);">
+                  ${hasActiveFilters ? 'No matching users found' : 'No users have joined yet'}
+                </p>
+                <p class="text-xs mb-4" style="color: var(--muted);">
+                  ${hasActiveFilters
+                    ? 'Try adjusting your search query or switching the level filter.'
+                    : 'New signups will automatically appear here once users register.'}
+                </p>
+                ${hasActiveFilters
+                  ? '<button type="button" onclick="resetAllFilters()" class="secondary-btn">Reset Filters</button>'
+                  : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+        summary.textContent = `Showing 0 of ${allUsers.length} users`;
+        pageInd.textContent = 'Page 1 of 1';
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
+
+      const effectivePageSize = pageSize === 'ALL' ? total : Number(pageSize);
+      const totalPages = Math.max(1, Math.ceil(total / effectivePageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const startIdx = (currentPage - 1) * effectivePageSize;
+      const pageItems = filteredUsers.slice(startIdx, startIdx + effectivePageSize);
+
+      tbody.innerHTML = pageItems.map(user => {
+        const palette = AVATAR_PALETTES[hashString(user.name || user.email) % AVATAR_PALETTES.length];
+        const initials = escapeHtml(getInitials(user.name));
+        const safeName = escapeHtml(user.name || 'Unnamed User');
+        const safeId = escapeHtml(user.id);
+        const rawEmail = user.email && user.email !== '—' ? String(user.email) : '';
+        const safeEmail = escapeHtml(rawEmail || '—');
+        const safeLevel = escapeHtml(user.level || 'Unassigned');
+        const levelStyle = getLevelStyle(user.level);
+        const joinedInfo = formatJoinedDate(user.joined_at, user.joined_raw);
+
+        return `
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="avatar-circle" style="background:${palette.bg};color:${palette.fg};">
+                  ${initials}
+                </div>
+                <div class="min-w-0">
+                  <p class="font-bold truncate" style="color: var(--accent); max-width: 230px;">${safeName}</p>
+                  <p class="mono text-xs" style="color: var(--muted); font-size: 0.68rem;">ID #${safeId}</p>
+                </div>
+              </div>
+            </td>
+            <td>
+              ${rawEmail
+                ? `<div class="flex items-center gap-2">
+                     <a href="mailto:${encodeURIComponent(rawEmail)}" class="mono hover:underline truncate" style="font-size: 0.8rem; color: var(--text); max-width: 260px;" title="${safeEmail}">
+                       ${safeEmail}
+                     </a>
+                     <button
+                       type="button"
+                       onclick="copySingleEmail(this)"
+                       data-email="${safeEmail}"
+                       class="p-1.5 rounded-md hover:bg-stone-200/70 transition-colors flex-shrink-0"
+                       style="color: var(--muted);"
+                       title="Copy email address"
+                       aria-label="Copy ${safeEmail}"
+                     >
+                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                       </svg>
+                     </button>
+                   </div>`
+                : `<span class="mono text-xs" style="color: var(--muted);">—</span>`
+              }
+            </td>
+            <td>
+              <span class="badge" style="${levelStyle}">
+                ${safeLevel}
+              </span>
+            </td>
+            <td>
+              <div>
+                <p class="font-medium" style="font-size: 0.82rem; color: var(--text); white-space: nowrap;">
+                  ${escapeHtml(joinedInfo.primary)}
+                </p>
+                <p class="mono" style="font-size: 0.69rem; color: var(--muted);">
+                  ${escapeHtml(joinedInfo.relative)}
+                </p>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const endIdx = startIdx + pageItems.length;
+      const filterSuffix = total !== allUsers.length ? ` (filtered from ${allUsers.length})` : '';
+      summary.textContent = `Showing ${startIdx + 1}–${endIdx} of ${total} users${filterSuffix}`;
+      pageInd.textContent = `Page ${currentPage} of ${totalPages}`;
+      prevBtn.disabled = currentPage <= 1;
+      nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    function renderTableError(msg) {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="py-12 text-center">
+            <p class="font-bold text-sm mb-1" style="color: #991b1b;">Could not load registered users</p>
+            <p class="mono text-xs mb-4" style="color: var(--muted);">${escapeHtml(msg)}</p>
+            <button type="button" onclick="loadDashboard(true)" class="secondary-btn">Try Again</button>
+          </td>
+        </tr>
+      `;
+      document.getElementById('paginationSummary').textContent = 'Connection error';
+    }
+
+    function handleSearchChange() {
+      applyFiltersAndRender(true);
+    }
+
+    function clearSearch() {
+      document.getElementById('userSearchInput').value = '';
+      applyFiltersAndRender(true);
+    }
+
+    function handleFilterOrSortChange() {
+      applyFiltersAndRender(true);
+    }
+
+    function handlePageSizeChange() {
+      const val = document.getElementById('pageSizeSelect').value;
+      pageSize = val === 'ALL' ? 'ALL' : Number(val);
+      currentPage = 1;
+      renderUsersTable();
+    }
+
+    function resetAllFilters() {
+      document.getElementById('userSearchInput').value = '';
+      document.getElementById('levelFilterSelect').value = 'ALL';
+      document.getElementById('sortSelect').value = 'newest';
+      applyFiltersAndRender(true);
+    }
+
+    function changePage(delta) {
+      currentPage += delta;
+      renderUsersTable();
+    }
+
+    async function copyTextToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      temp.style.position = 'fixed';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+    }
+
+    async function copySingleEmail(btn) {
+      const email = btn.getAttribute('data-email');
+      if (!email) return;
+      try {
+        await copyTextToClipboard(email);
+        showToast(`Copied ${email}`);
+      } catch (e) {
+        showToast('Failed to copy email');
+      }
+    }
+
+    async function copyAllEmails() {
+      const source = filteredUsers.length > 0 ? filteredUsers : allUsers;
+      const emails = [...new Set(
+        source
+          .map(u => u.email)
+          .filter(e => e && e !== '—' && e.includes('@'))
+      )];
+      if (emails.length === 0) {
+        showToast('No valid email addresses to copy');
+        return;
+      }
+      try {
+        await copyTextToClipboard(emails.join(', '));
+        showToast(`Copied ${emails.length} email ${emails.length === 1 ? 'address' : 'addresses'}`);
+      } catch (e) {
+        showToast('Clipboard permission denied');
+      }
+    }
+
+    function exportUsersCSV() {
+      const source = filteredUsers.length > 0 ? filteredUsers : allUsers;
+      if (source.length === 0) {
+        showToast('No user records available to export');
+        return;
+      }
+      const headers = ['ID', 'Name', 'Email', 'Level', 'Time Joined'];
+      const csvRows = [
+        headers.join(','),
+        ...source.map(u => {
+          const joined = u.joined_at || u.joined_raw || '';
+          return [u.id, u.name, u.email, u.level, joined]
+            .map(val => `"${String(val ?? '').replace(/"/g, '""')}"`)
+            .join(',');
+        }),
+      ];
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const today = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `quevra-users-${today}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${source.length} users to CSV`);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = message;
+      toast.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    // Broadcast form validation (email delivery intentionally left paused for now)
     function handleSend() {
       const subject = document.getElementById('emailSubject');
       const header  = document.getElementById('emailHeader');
       const body    = document.getElementById('emailBody');
       const errMsg  = document.getElementById('fieldError');
-      const btn     = document.querySelector('.send-btn');
+      const btn     = document.getElementById('sendBroadcastBtn');
       const fields  = [subject, header, body];
       let valid = true;
 
-      fields.forEach(f => { f.classList.remove('error-border'); if (!f.value.trim()) { f.classList.add('error-border'); valid = false; } });
+      fields.forEach(f => {
+        f.classList.remove('error-border');
+        if (!f.value.trim()) {
+          f.classList.add('error-border');
+          valid = false;
+        }
+      });
 
       if (!valid) {
         errMsg.style.display = 'block';
@@ -457,15 +1400,39 @@
 
       errMsg.style.display = 'none';
       document.getElementById('previewSubject').textContent = subject.value.trim();
+      document.getElementById('previewHeader').textContent = header.value.trim();
       document.getElementById('successModal').classList.add('active');
-      subject.value = ''; header.value = ''; body.value = '';
+      subject.value = '';
+      header.value = '';
+      body.value = '';
       fields.forEach(f => f.classList.remove('error-border'));
     }
 
     function closeModal(e) {
-      if (!e || e.target === document.getElementById('successModal'))
+      if (!e || e.target === document.getElementById('successModal')) {
         document.getElementById('successModal').classList.remove('active');
+      }
     }
+
+    // Keyboard shortcuts: Escape closes modal; '/' focuses user search
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('successModal').classList.remove('active');
+      }
+      if (
+        e.key === '/' &&
+        !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)
+      ) {
+        e.preventDefault();
+        document.getElementById('userSearchInput').focus();
+      }
+    });
+
+    // Initial load + 45-second background live sync
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDashboard(false);
+      setInterval(() => loadDashboard(false), 45000);
+    });
   </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a59028b72abf8ddc',t:'MTc5NDQzMDExOQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a59028b72abf8ddc',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
