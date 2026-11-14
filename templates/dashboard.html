@@ -418,6 +418,77 @@
       .broadcast-grid { grid-template-columns: 1fr 1fr; }
       .broadcast-span-2 { grid-column: span 2; }
     }
+
+    /* KPI subtext + chat/activity additions */
+    .kpi-sub {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.45;
+    }
+    .kpi-sub strong { color: var(--text); font-weight: 700; }
+    .activity-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 1024px) {
+      .activity-grid { grid-template-columns: 2fr 1fr; }
+    }
+    .chart-scroll { overflow-x: auto; padding-bottom: 6px; }
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      min-width: 640px;
+      height: 190px;
+      padding: 10px 4px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .chart-col {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+      min-width: 34px;
+    }
+    .chart-bar-group {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 150px;
+    }
+    .chart-bar {
+      width: 10px;
+      border-radius: 4px 4px 2px 2px;
+      min-height: 2px;
+      position: relative;
+      transition: height 0.5s ease;
+    }
+    .chart-bar.sessions { background: #059669; }
+    .chart-bar.users { background: #0284c7; }
+    .chart-bar.chat { background: #4f46e5; }
+    .chart-bar.today { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .chart-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--muted);
+      margin-top: 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .chart-label.today { color: var(--accent); font-weight: 700; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .topic-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #efede7; }
+    .topic-row:last-child { border-bottom: none; }
+    .topic-bar-track { flex: 1; height: 8px; background: #f0ede8; border-radius: 99px; overflow: hidden; }
+    .topic-bar-fill { height: 100%; background: var(--accent2); border-radius: 99px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .detail-item { background: #faf9f6; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    .detail-item .k { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .detail-item .v { font-size: 0.95rem; font-weight: 800; color: var(--accent); margin-top: 2px; }
   </style>
 </head>
 <body class="relative">
@@ -442,6 +513,7 @@
 
       <nav class="hidden md:flex items-center gap-6 text-sm font-semibold" style="color: var(--muted);">
         <a href="#overview" class="hover:text-slate-900 transition-colors">Overview</a>
+        <a href="#activitySection" class="hover:text-slate-900 transition-colors">Activity</a>
         <a href="#usersDirectory" class="hover:text-slate-900 transition-colors">Users Directory</a>
         <a href="#broadcastSection" class="hover:text-slate-900 transition-colors">Email Broadcast</a>
       </nav>
@@ -530,6 +602,7 @@
           </div>
           <div class="divider mb-3.5"></div>
           <span id="levelsSummaryBadge" class="badge indigo">All levels</span>
+          <p class="kpi-sub" id="joinedSubtext">New signups in the last 7 days.</p>
         </div>
 
         <!-- Total Sessions -->
@@ -549,12 +622,12 @@
           <span id="sessionsTrendBadge" class="badge neutral">Loading…</span>
         </div>
 
-        <!-- Avg Sessions / Day -->
+        <!-- Sessions Today (actual count for today, not an average) -->
         <div class="card p-6 anim anim-d4">
           <div class="flex items-start justify-between mb-4">
             <div>
-              <span class="label">Sessions / Day</span>
-              <div class="stat-number" id="avgSessions">—</div>
+              <span class="label">Sessions Today</span>
+              <div class="stat-number" id="sessionsToday">—</div>
             </div>
             <div class="stat-icon" style="background: #fef3c7;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2">
@@ -566,7 +639,128 @@
             </div>
           </div>
           <div class="divider mb-3.5"></div>
-          <span class="badge neutral">Avg · 30-day window</span>
+          <span id="sessionsTodayBadge" class="badge neutral">Loading…</span>
+          <p class="kpi-sub" id="sessionsTodaySubtext">Actual sessions recorded today (UTC).</p>
+        </div>
+      </div>
+
+      <!-- Chat & Engagement KPIs (auto-discovered from chat / session tables) -->
+      <div class="kpi-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-5">
+        <div class="card p-6 anim anim-d4">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="label" id="chatTotalLabel">Total Chats</span>
+              <div class="stat-number" id="chatTotal">—</div>
+            </div>
+            <div class="stat-icon" style="background: #ede9fe;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="divider mb-3.5"></div>
+          <span id="chatTrendBadge" class="badge neutral">Loading…</span>
+          <p class="kpi-sub" id="chatTotalSubtext">Auto-detected chat / session activity.</p>
+        </div>
+
+        <div class="card p-6 anim anim-d4">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="label" id="chatTodayLabel">Chats Today</span>
+              <div class="stat-number" id="chatToday">—</div>
+            </div>
+            <div class="stat-icon" style="background: #e0f2fe;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+          </div>
+          <div class="divider mb-3.5"></div>
+          <span id="chatTodayBadge" class="badge neutral">Loading…</span>
+          <p class="kpi-sub" id="chatTodaySubtext">Actual count for today (UTC).</p>
+        </div>
+
+        <div class="card p-6 anim anim-d4">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="label">Active Users</span>
+              <div class="stat-number" id="chatActiveUsers">—</div>
+            </div>
+            <div class="stat-icon" style="background: #d1fae5;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+          </div>
+          <div class="divider mb-3.5"></div>
+          <span id="chatActiveBadge" class="badge neutral">Unique users</span>
+          <p class="kpi-sub" id="chatActiveSubtext">Distinct users with recorded activity.</p>
+        </div>
+
+        <div class="card p-6 anim anim-d4">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="label" id="chatAvgLabel">Avg / Active User</span>
+              <div class="stat-number" id="chatAvgPerUser">—</div>
+            </div>
+            <div class="stat-icon" style="background: #fce7f3;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#be185d" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+          </div>
+          <div class="divider mb-3.5"></div>
+          <span id="chatAvgBadge" class="badge neutral">Per active user</span>
+          <p class="kpi-sub" id="chatAvgSubtext">Total ÷ active users.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 1b: Activity — Actual counts per day (last 14 days) -->
+    <section id="activitySection" class="mb-10 anim anim-d4">
+      <div class="mb-5">
+        <p class="section-title mb-1">Activity</p>
+        <h2 style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; color: var(--accent);">Actual counts per day</h2>
+        <p style="font-size: 0.84rem; color: var(--muted); margin-top: 3px;">Real daily totals for the last 14 days (UTC) — not averages. Today is outlined.</p>
+      </div>
+
+      <div class="activity-grid">
+        <div class="card p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div class="flex flex-wrap items-center gap-4 text-xs font-semibold" style="color: var(--muted);">
+              <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#059669;"></span> Sessions</span>
+              <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#0284c7;"></span> New users</span>
+              <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#4f46e5;"></span> <span id="chartChatLegend">Chat</span></span>
+            </div>
+            <span id="activitySummary" class="mono" style="font-size: 0.7rem; color: var(--muted);">Loading…</span>
+          </div>
+          <div class="chart-scroll">
+            <div id="activityChart" class="chart-bars" role="img" aria-label="Daily activity bar chart for the last 14 days">
+              <p class="mono text-xs" style="color: var(--muted); padding: 20px;">Loading daily activity…</p>
+            </div>
+          </div>
+          <p class="mono mt-3" style="font-size: 0.68rem; color: var(--muted);">Hover a bar for exact counts. Bars scale to the busiest day in the window.</p>
+        </div>
+
+        <div class="card p-6">
+          <p class="section-title mb-1">Chat Usage</p>
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--accent); margin-bottom: 4px;">Top topics & source</h3>
+          <p id="chatSourceInfo" class="mono mb-4" style="font-size: 0.7rem; color: var(--muted);">Detecting chat table…</p>
+          <div id="topTopicsList">
+            <p class="text-xs" style="color: var(--muted);">Loading topics…</p>
+          </div>
+          <div class="detail-grid mt-4">
+            <div class="detail-item"><div class="k">Last 7 days</div><div class="v" id="chatLast7d">—</div></div>
+            <div class="detail-item"><div class="k">Last 30 days</div><div class="v" id="chatLast30d">—</div></div>
+            <div class="detail-item"><div class="k">Yesterday</div><div class="v" id="chatYesterday">—</div></div>
+            <div class="detail-item"><div class="k">Per day (7d avg)</div><div class="v" id="chatPerDay7d">—</div></div>
+          </div>
         </div>
       </div>
     </section>
@@ -1025,33 +1219,274 @@
       }
     }
 
+    function formatShortDate(isoStr) {
+      if (!isoStr) return '—';
+      const dt = new Date(isoStr);
+      if (Number.isNaN(dt.getTime())) return String(isoStr);
+      return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    function formatFullDate(isoStr) {
+      if (!isoStr) return '—';
+      const dt = new Date(isoStr);
+      if (Number.isNaN(dt.getTime())) return String(isoStr);
+      return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function seriesToMap(series) {
+      const map = {};
+      if (Array.isArray(series)) {
+        series.forEach(item => {
+          if (item && item.date) map[item.date] = Number(item.count) || 0;
+        });
+      }
+      return map;
+    }
+
+    function renderActivityChart(payload) {
+      const chartEl = document.getElementById('activityChart');
+      if (!chartEl) return;
+      const sessionsMap = seriesToMap(payload.sessions_daily_series);
+      const usersMap = seriesToMap(payload.users_daily_series);
+      const chatMap = seriesToMap(payload.chat && payload.chat.daily_series);
+      const todayUtc = payload.today_utc || new Date().toISOString().slice(0, 10);
+
+      // Build ordered date list from whichever series is available (last 14 days)
+      const dateSet = new Set([...Object.keys(sessionsMap), ...Object.keys(usersMap), ...Object.keys(chatMap)]);
+      let dates = [...dateSet].sort();
+      if (dates.length === 0) {
+        chartEl.innerHTML = '<p class="mono text-xs" style="color: var(--muted); padding: 20px;">No dated activity available yet. Daily counts appear once sessions / signups / chats have timestamps.</p>';
+        document.getElementById('activitySummary').textContent = 'No dated activity';
+        return;
+      }
+      // Keep only last 14 dates for a clean chart
+      dates = dates.slice(-14);
+
+      const maxVal = Math.max(
+        1,
+        ...dates.map(d => Math.max(sessionsMap[d] || 0, usersMap[d] || 0, chatMap[d] || 0))
+      );
+
+      const chatLabel = (payload.chat && payload.chat.source_label) || 'Chat';
+      document.getElementById('chartChatLegend').textContent = chatLabel;
+
+      chartEl.innerHTML = dates.map(date => {
+        const s = sessionsMap[date] || 0;
+        const u = usersMap[date] || 0;
+        const c = chatMap[date] || 0;
+        const isToday = date === todayUtc;
+        const h = v => Math.max(2, Math.round((v / maxVal) * 150));
+        const label = formatShortDate(date + 'T00:00:00Z');
+        const title = `${formatFullDate(date + 'T00:00:00Z')} — Sessions: ${s} · New users: ${u} · ${chatLabel}: ${c}`;
+        return `
+          <div class="chart-col" title="${escapeHtml(title)}">
+            <div class="chart-bar-group">
+              <div class="chart-bar sessions ${isToday ? 'today' : ''}" style="height:${h(s)}px;" title="Sessions: ${s}"></div>
+              <div class="chart-bar users ${isToday ? 'today' : ''}" style="height:${h(u)}px;" title="New users: ${u}"></div>
+              <div class="chart-bar chat ${isToday ? 'today' : ''}" style="height:${h(c)}px;" title="${escapeHtml(chatLabel)}: ${c}"></div>
+            </div>
+            <div class="chart-label ${isToday ? 'today' : ''}">${isToday ? 'Today' : escapeHtml(label)}</div>
+          </div>
+        `;
+      }).join('');
+
+      const last7 = dates.slice(-7);
+      const sum7 = (map) => last7.reduce((acc, d) => acc + (map[d] || 0), 0);
+      document.getElementById('activitySummary').textContent =
+        `Last 7d: ${sum7(sessionsMap)} sessions · ${sum7(usersMap)} new users · ${sum7(chatMap)} ${chatLabel.toLowerCase()}`;
+    }
+
+    function renderTopTopics(topics) {
+      const listEl = document.getElementById('topTopicsList');
+      if (!listEl) return;
+      if (!Array.isArray(topics) || topics.length === 0) {
+        listEl.innerHTML = '<p class="text-xs" style="color: var(--muted);">No topic data recorded yet.</p>';
+        return;
+      }
+      const maxCount = Math.max(...topics.map(t => Number(t.count) || 0), 1);
+      listEl.innerHTML = topics.map(t => {
+        const pct = Math.round(((Number(t.count) || 0) / maxCount) * 100);
+        return `
+          <div class="topic-row">
+            <span class="font-semibold truncate" style="font-size: 0.8rem; color: var(--text); max-width: 150px;" title="${escapeHtml(t.topic)}">${escapeHtml(t.topic)}</span>
+            <div class="topic-bar-track"><div class="topic-bar-fill" style="width:${pct}%;"></div></div>
+            <span class="mono" style="font-size: 0.72rem; color: var(--muted); min-width: 28px; text-align: right;">${Number(t.count).toLocaleString()}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateJoinedCard(payload) {
+      const el = document.getElementById('newUsers7d');
+      const badge = document.getElementById('levelsSummaryBadge');
+      const sub = document.getElementById('joinedSubtext');
+      const new7 = payload.new_users_7d;
+      const new30 = payload.new_users_30d;
+      const levelsCount = payload.levels_count;
+
+      if (new7 === null || new7 === undefined) {
+        // No usable join dates in DB — show honest "—", never a fake 0
+        el.textContent = '—';
+        previousMetrics['new7d'] = null;
+        badge.className = 'badge neutral';
+        badge.textContent = 'No join dates in DB';
+        const cols = payload.users_columns && payload.users_columns.length
+          ? `Columns: ${payload.users_columns.join(', ')}`
+          : 'Add a created_at column to enable this metric.';
+        sub.innerHTML = `${escapeHtml(cols)} <span style="display:block; margin-top:2px;">Total users still shown below.</span>`;
+      } else {
+        animateMetric(el, 'new7d', new7, 0);
+        badge.className = 'badge indigo';
+        badge.textContent = levelsCount > 0
+          ? `${levelsCount} active ${levelsCount === 1 ? 'level' : 'levels'}`
+          : 'Recent signups';
+        const lastSignup = payload.last_signup_at ? ` · Last signup ${formatFullDate(payload.last_signup_at)}` : '';
+        const todayBit = payload.new_users_today !== null && payload.new_users_today !== undefined
+          ? ` · Today: ${payload.new_users_today}`
+          : '';
+        sub.innerHTML = new30 !== null && new30 !== undefined
+          ? `<strong>${new30}</strong> in last 30 days${todayBit}${lastSignup}`
+          : `New signups in the last 7 days.${lastSignup}`;
+      }
+    }
+
+    function updateSessionsTodayCard(payload) {
+      const el = document.getElementById('sessionsToday');
+      const badge = document.getElementById('sessionsTodayBadge');
+      const sub = document.getElementById('sessionsTodaySubtext');
+      const today = payload.sessions_today;
+      const last7 = payload.sessions_last_7d;
+      const perDay7 = payload.sessions_per_day_7d;
+      const yesterday = payload.sessions_yesterday;
+
+      if (today === null || today === undefined) {
+        // Backwards-compat: old backend only has avg_sessions (30-day average)
+        const avg = payload.avg_sessions;
+        if (avg !== null && avg !== undefined) {
+          const avgRounded = Math.round(Number(avg) * 100) / 100;
+          animateMetric(el, 'sessionsToday', avgRounded, avgRounded % 1 !== 0 ? 2 : 0);
+          badge.className = 'badge neutral';
+          badge.textContent = 'Old backend · 30d avg';
+          sub.textContent = 'Update app.py to show actual sessions today.';
+        } else {
+          el.textContent = '—';
+          badge.className = 'badge neutral';
+          badge.textContent = 'No session dates';
+          sub.textContent = 'Sessions exist but have no usable timestamps.';
+        }
+        return;
+      }
+
+      animateMetric(el, 'sessionsToday', today, 0);
+      badge.className = 'badge';
+      if (last7 !== null && last7 !== undefined) {
+        badge.textContent = `${last7} in last 7 days`;
+      } else {
+        badge.textContent = 'Today (UTC)';
+      }
+      const yBit = yesterday !== null && yesterday !== undefined ? ` · Yesterday: ${yesterday}` : '';
+      const avgBit = perDay7 !== null && perDay7 !== undefined ? ` · ${perDay7}/day avg (7d)` : '';
+      sub.innerHTML = `Actual sessions today (UTC).${yBit}${avgBit}`;
+    }
+
+    function updateChatCards(payload) {
+      const chat = payload.chat || {};
+      const label = chat.source_label || 'Chat';
+      const totalLabel = document.getElementById('chatTotalLabel');
+      const todayLabel = document.getElementById('chatTodayLabel');
+      const avgLabel = document.getElementById('chatAvgLabel');
+
+      if (totalLabel) totalLabel.textContent = `Total ${label}`;
+      if (todayLabel) todayLabel.textContent = `${label} Today`;
+      if (avgLabel) avgLabel.textContent = `Avg / Active User`;
+
+      const totalEl = document.getElementById('chatTotal');
+      const todayEl = document.getElementById('chatToday');
+      const activeEl = document.getElementById('chatActiveUsers');
+      const avgEl = document.getElementById('chatAvgPerUser');
+
+      if (!chat.available) {
+        [totalEl, todayEl, activeEl, avgEl].forEach(e => { if (e) e.textContent = '—'; });
+        document.getElementById('chatTrendBadge').className = 'badge neutral';
+        document.getElementById('chatTrendBadge').textContent = 'No chat table';
+        document.getElementById('chatTodayBadge').textContent = '—';
+        document.getElementById('chatActiveBadge').textContent = '—';
+        document.getElementById('chatAvgBadge').textContent = '—';
+        document.getElementById('chatTotalSubtext').textContent = 'No chat/session table detected in the database.';
+        document.getElementById('chatSourceInfo').textContent = 'Tables found: ' + ((payload.tables || []).join(', ') || 'none');
+        document.getElementById('chatLast7d').textContent = '—';
+        document.getElementById('chatLast30d').textContent = '—';
+        document.getElementById('chatYesterday').textContent = '—';
+        document.getElementById('chatPerDay7d').textContent = '—';
+        renderTopTopics(payload.top_topics || []);
+        return;
+      }
+
+      animateMetric(totalEl, 'chatTotal', chat.total, 0);
+      if (chat.today !== null && chat.today !== undefined) {
+        animateMetric(todayEl, 'chatToday', chat.today, 0);
+      } else {
+        todayEl.textContent = '—';
+      }
+      if (chat.active_users !== null && chat.active_users !== undefined) {
+        animateMetric(activeEl, 'chatActiveUsers', chat.active_users, 0);
+      } else {
+        // Fall back to session active users when chat has no user column
+        const fallbackActive = payload.active_users_sessions;
+        if (fallbackActive !== null && fallbackActive !== undefined) {
+          animateMetric(activeEl, 'chatActiveUsers', fallbackActive, 0);
+        } else {
+          activeEl.textContent = '—';
+        }
+      }
+      if (chat.avg_per_active_user !== null && chat.avg_per_active_user !== undefined) {
+        animateMetric(avgEl, 'chatAvgPerUser', chat.avg_per_active_user, 2);
+      } else if (payload.avg_sessions_per_active_user !== null && payload.avg_sessions_per_active_user !== undefined) {
+        animateMetric(avgEl, 'chatAvgPerUser', payload.avg_sessions_per_active_user, 2);
+      } else {
+        avgEl.textContent = '—';
+      }
+
+      applyTrendBadge(document.getElementById('chatTrendBadge'), chat.trend || { text: 'Recorded activity', direction: 'neutral' });
+      const todayBadge = document.getElementById('chatTodayBadge');
+      todayBadge.className = 'badge neutral';
+      todayBadge.textContent = chat.last_7d !== null && chat.last_7d !== undefined
+        ? `${chat.last_7d} in last 7 days`
+        : 'Today (UTC)';
+      document.getElementById('chatActiveBadge').textContent = 'Unique users';
+      document.getElementById('chatAvgBadge').textContent = 'Per active user';
+      document.getElementById('chatTotalSubtext').textContent = `Source: ${chat.source_table || label}${chat.time_column ? ' · ' + chat.time_column : ''}`;
+      document.getElementById('chatTodaySubtext').textContent = 'Actual count for today (UTC).';
+      document.getElementById('chatActiveSubtext').textContent = 'Distinct users with recorded activity.';
+      document.getElementById('chatAvgSubtext').textContent = 'Total ÷ active users.';
+
+      document.getElementById('chatSourceInfo').textContent =
+        `Source: ${chat.source_table || '—'} · ${label} · Time column: ${chat.time_column || 'none'}`;
+      document.getElementById('chatLast7d').textContent = chat.last_7d !== null && chat.last_7d !== undefined ? Number(chat.last_7d).toLocaleString() : '—';
+      document.getElementById('chatLast30d').textContent = chat.last_30d !== null && chat.last_30d !== undefined ? Number(chat.last_30d).toLocaleString() : '—';
+      document.getElementById('chatYesterday').textContent = chat.yesterday !== null && chat.yesterday !== undefined ? Number(chat.yesterday).toLocaleString() : '—';
+      document.getElementById('chatPerDay7d').textContent = chat.per_day_7d !== null && chat.per_day_7d !== undefined ? Number(chat.per_day_7d).toLocaleString() : '—';
+
+      const topics = (chat.top_topics && chat.top_topics.length > 0) ? chat.top_topics : (payload.top_topics || []);
+      renderTopTopics(topics);
+    }
+
     async function loadDashboard(isManual = false) {
       setConnectionState('syncing');
       try {
         // 1. Always fetch /api/user_stats first — works on BOTH old and new app.py!
         const statsRes = await fetch('/api/user_stats', { headers: { 'Accept': 'application/json' } });
-        const statsPayload = await statsRes.json().catch(() => ({}));
+        const statsPayload = await statsRes.json().catch(() => ({}) );
         if (!statsRes.ok) {
           throw new Error(statsPayload.detail || statsPayload.error || `HTTP ${statsRes.status} from /api/user_stats`);
         }
 
         const usersCount = statsPayload.users_count;
         const sessionsCount = statsPayload.sessions_count;
-        const avgSessionsRaw = statsPayload.avg_sessions;
-        const avgSessionsRounded =
-          avgSessionsRaw !== null && avgSessionsRaw !== undefined
-            ? Math.round(Number(avgSessionsRaw) * 100) / 100
-            : null;
 
         // Populate KPI stat cards immediately so counts ALWAYS display
         animateMetric(document.getElementById('totalUsers'), 'users', usersCount, 0);
         animateMetric(document.getElementById('totalSessions'), 'sessions', sessionsCount, 0);
-        animateMetric(
-          document.getElementById('avgSessions'),
-          'avgSessions',
-          avgSessionsRounded,
-          avgSessionsRounded !== null && avgSessionsRounded % 1 !== 0 ? 2 : 0
-        );
 
         applyTrendBadge(
           document.getElementById('usersTrendBadge'),
@@ -1069,8 +1504,6 @@
 
         // 2. Check if /api/user_stats already includes `users` (new app.py); otherwise try /api/users
         let usersArray = Array.isArray(statsPayload.users) ? statsPayload.users : null;
-        let newUsers7d = statsPayload.new_users_7d;
-        let levelsCount = statsPayload.levels_count;
 
         if (!usersArray) {
           const usersRes = await fetch('/api/users', { headers: { 'Accept': 'application/json' } });
@@ -1078,13 +1511,28 @@
             const usersPayload = await usersRes.json().catch(() => ({}));
             usersArray = Array.isArray(usersPayload.users) ? usersPayload.users : [];
             if (usersPayload.stats) {
-              newUsers7d = usersPayload.stats.new_users_7d;
-              levelsCount = usersPayload.stats.levels_count;
+              // Merge newer stats fields from /api/users when available
+              Object.assign(statsPayload, {
+                new_users_7d: usersPayload.stats.new_users_7d,
+                new_users_30d: usersPayload.stats.new_users_30d,
+                new_users_today: usersPayload.stats.new_users_today,
+                sessions_today: usersPayload.stats.sessions_today,
+                sessions_last_7d: usersPayload.stats.sessions_last_7d,
+                sessions_per_day_7d: usersPayload.stats.sessions_per_day_7d,
+                chat: usersPayload.stats.chat,
+                top_topics: usersPayload.stats.top_topics,
+                joined_at_available: usersPayload.stats.joined_at_available,
+                last_signup_at: usersPayload.stats.last_signup_at,
+              });
             }
           } else if (usersRes.status === 404) {
             // Stats loaded fine, but server is still running the old app.py without /api/users!
             document.getElementById('newUsers7d').textContent = '—';
             document.getElementById('levelsSummaryBadge').textContent = 'Update app.py';
+            document.getElementById('joinedSubtext').textContent = 'Update app.py + restart Gunicorn to load the users directory.';
+            updateSessionsTodayCard(statsPayload);
+            updateChatCards(statsPayload);
+            renderActivityChart(statsPayload);
             setConnectionState('live');
             renderBackendUpdateNotice(usersCount);
             return;
@@ -1096,17 +1544,13 @@
 
         allUsers = usersArray;
 
-        animateMetric(
-          document.getElementById('newUsers7d'),
-          'new7d',
-          newUsers7d !== null && newUsers7d !== undefined ? newUsers7d : 0,
-          0
-        );
-
-        const levelsBadge = document.getElementById('levelsSummaryBadge');
-        levelsBadge.textContent = levelsCount > 0
-          ? `${levelsCount} active ${levelsCount === 1 ? 'level' : 'levels'}`
-          : 'Recent signups';
+        // Fixed Joined (7 Days): null (no join dates) shows "—", never fake 0
+        updateJoinedCard(statsPayload);
+        // Sessions Today: actual daily count, not a 30-day average
+        updateSessionsTodayCard(statsPayload);
+        // Chat usage cards + top topics + activity chart
+        updateChatCards(statsPayload);
+        renderActivityChart(statsPayload);
 
         document.getElementById('usersCountPill').textContent = `${allUsers.length.toLocaleString()} ${allUsers.length === 1 ? 'user' : 'users'}`;
         document.getElementById('recipientCountLabel').textContent = `${allUsers.length.toLocaleString()} registered`;
@@ -1526,5 +1970,5 @@
       setInterval(() => loadDashboard(false), 45000);
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5903d3bfa18df76',t:'MTc5NDQzMDk2MA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5903d3bfa18df76',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
